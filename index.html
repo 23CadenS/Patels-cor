@@ -8,20 +8,27 @@
 <body>
     <script>
         function handleRequest() {
-            const url = new URL(window.location.href).searchParams.get('url');
-            if (!url) {
+            const targetUrl = new URL(window.location.href).searchParams.get('url');
+            if (!targetUrl) {
                 document.body.innerHTML = '<p>Missing URL parameter</p>';
                 return;
             }
 
-            fetch(url)
-                .then(response => response.text())
+            const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
+
+            fetch(proxyUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
                 .then(data => {
                     document.body.innerHTML = '<pre>' + data + '</pre>';
                 })
                 .catch(error => {
-                    document.body.innerHTML = '<p>Error fetching data</p>';
-                    console.error(error);
+                    document.body.innerHTML = '<p>Error fetching data: ' + error.message + '</p>';
+                    console.error('Error fetching data:', error);
                 });
         }
 
